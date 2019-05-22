@@ -4,7 +4,7 @@ export const mainInitialState = {
     obj: {},
 };
 
-export default (state = mainInitialState, action) => {
+export default (state, action) => {
     switch (action.type) {
         case mainConstants.INIT_PAGE:
             return mainInitialState;
