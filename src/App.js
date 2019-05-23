@@ -3,35 +3,51 @@ import {context} from "./context";
 import * as mainAction from "./context/main/mainAction";
 import {getJson} from "./util";
 
-function useInitPage(url, {state, dispatch}) {
+function useInitPage(initUrl, {state, dispatch}) {
     const [res, setRes] = useState(null);
+    const [url, setUrl] = useState(initUrl);
+
+    const addValue = url => setUrl(url);
 
     useEffect(() => {
         let ignore = false;
         const getData = async () => {
-            dispatch(mainAction.pageLoading(true));
-            const res = await getJson(url, {value: state.value});
-            if (!ignore) {
-                setRes(res);
+            try {
+                dispatch(mainAction.pageLoading(true));
+                const res = await getJson(url, {value: state.value});
+                if (!ignore) {
+                    setRes(res);
+                }
+                dispatch(mainAction.initPage(res));
+                dispatch(mainAction.pageLoading(false));
+            } catch (err) {
+                if (!ignore) {
+                    dispatch(mainAction.changeError(err.message));
+                }
             }
-            dispatch(mainAction.initPage(res));
-            dispatch(mainAction.pageLoading(false));
         };
         getData();
         return () => { ignore = true };
-    }, [url, state.value, dispatch]);
+    }, [url, dispatch]);
 
-    return [res];
+    return [res, addValue];
 }
 
 function App() {
+    const initUrl = '/pool/query';
     const {state, dispatch} = useContext(context).main;
-    const [res] = useInitPage('/pool/query', {state, dispatch});
+    const [res, addValue] = useInitPage(initUrl, {state, dispatch});
+
+    useEffect(() => {
+        if (state.error !== '') {
+            alert(state.error);
+        }
+    }, [state.error]);
 
     return (
         <div>
             <div>
-                <button onClick={() => dispatch(mainAction.addValue('user'))}>user</button>
+                <button onClick={() => addValue(initUrl + '?bagName=224-truck2_2019-05-09-14-28-19_41-0')}>user</button>
                 {res && res.map(item =>
                     <p key={item.id}>{item.bagName}</p>
                 )}

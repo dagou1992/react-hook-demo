@@ -1,7 +1,7 @@
 import mainConstants from './mainConstants';
 
 export const mainInitialState = {
-    value: '',
+    error: '',
     data: [],
     loading: false,
 };
@@ -14,8 +14,8 @@ export default (state, action) => {
         case mainConstants.PAGE_LOADING:
             return {...state, loading: action.payload};
 
-        case mainConstants.ADD_VALUE_IN_OBJECT:
-            return {...state, value: action.payload};
+        case mainConstants.CHANGE_ERROR:
+            return {...state, error: action.payload};
 
         default:
             return state;
