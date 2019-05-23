@@ -1,31 +1,40 @@
-import React, {useContext, useEffect, useRef} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {context} from "./context";
 import * as mainAction from "./context/main/mainAction";
+import {getJson} from "./util";
+
+function useInitPage(url, {state, dispatch}) {
+    const [res, setRes] = useState(null);
+
+    useEffect(() => {
+        let ignore = false;
+        const getData = async () => {
+            dispatch(mainAction.pageLoading(true));
+            const res = await getJson(url, {value: state.value});
+            if (!ignore) {
+                setRes(res);
+            }
+            dispatch(mainAction.initPage(res));
+            dispatch(mainAction.pageLoading(false));
+        };
+        getData();
+        return () => { ignore = true };
+    }, [url, state.value, dispatch]);
+
+    return [res];
+}
 
 function App() {
-    const self = useRef();
     const {state, dispatch} = useContext(context).main;
-
-    // componentDidMount、componentWillUnmount
-    useEffect(() => {
-        const timeInterval = setInterval(() => console.log(1), 1000);
-        return () => clearInterval(timeInterval);
-    }, []);
-
-    // componentDidMount
-    useEffect(() => dispatch(mainAction.initPage()), [dispatch]);
-
-    // componentDidUpdate
-    useEffect(() => {
-        console.log(self.current);
-    }, [state.obj]);
+    const [res] = useInitPage('/pool/query', {state, dispatch});
 
     return (
         <div>
-            {JSON.stringify(state, null, 2)}
             <div>
                 <button onClick={() => dispatch(mainAction.addValue('user'))}>user</button>
-                <input type="text" ref={self}/>
+                {res && res.map(item =>
+                    <p key={item.id}>{item.bagName}</p>
+                )}
             </div>
         </div>
     );
