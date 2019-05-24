@@ -3,9 +3,9 @@ import {context} from "./context";
 import * as mainAction from "./context/main/mainAction";
 import {getJson} from "./util";
 
-function useInitPage(initUrl, {state, dispatch}) {
-    const [res, setRes] = useState([]);
-    const [url, setUrl] = useState(initUrl);
+function useInitPage({state, dispatch, action}) {
+    const [res, setRes] = useState(state.res);
+    const [url, setUrl] = useState(state.url);
 
     const addValue = url => setUrl(url);
 
@@ -13,16 +13,16 @@ function useInitPage(initUrl, {state, dispatch}) {
         let ignore = false;
         const getData = async () => {
             try {
-                dispatch(mainAction.pageLoading(true));
+                dispatch(action.pageLoading(true));
                 const res = await getJson(url);
                 if (!ignore) {
-                    setRes(res);
+                    setRes(res); // 也可以不返回res
+                    dispatch(action.initPage(res));
                 }
-                dispatch(mainAction.initPage(res));
-                dispatch(mainAction.pageLoading(false));
+                dispatch(action.pageLoading(false));
             } catch (err) {
                 if (!ignore) {
-                    dispatch(mainAction.changeError(err.message));
+                    dispatch(action.changeError(err.message));
                 }
             }
         };
@@ -30,13 +30,12 @@ function useInitPage(initUrl, {state, dispatch}) {
         return () => { ignore = true };
     }, [url, dispatch]);
 
-    return [res, addValue];
+    return {res, addValue};
 }
 
 function App() {
-    const initUrl = '/pool/query';
     const {state, dispatch} = useContext(context).main;
-    const [res, addValue] = useInitPage(initUrl, {state, dispatch});
+    const {res, addValue} = useInitPage({state, dispatch, action: mainAction});
 
     useEffect(() => {
         if (state.error !== '') {
@@ -47,7 +46,7 @@ function App() {
     return (
         <div>
             <div>
-                <button onClick={() => addValue(initUrl + '?bagName=224-truck2_2019-05-09-14-28-19_41-0')}>search</button>
+                <button onClick={() => addValue(state.url + '?bagName=224-truck2_2019-05-09-14-28-19_41-0')}>search</button>
                 {res.map(item =>
                     <p key={item.id}>{item.bagName}</p>
                 )}

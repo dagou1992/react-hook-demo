@@ -2,14 +2,18 @@ import mainConstants from './mainConstants';
 
 export const mainInitialState = {
     error: '',
-    data: [],
+    res: [],
+    url: '/pool/query',
     loading: false,
 };
 
 export default (state, action) => {
     switch (action.type) {
         case mainConstants.INIT_PAGE:
-            return {...state, data: action.payload};
+            return {...state, res: action.payload};
+
+        case mainConstants.TO_SEARCH:
+            return {...state, url: action.payload};
 
         case mainConstants.PAGE_LOADING:
             return {...state, loading: action.payload};
