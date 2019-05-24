@@ -4,7 +4,7 @@ import * as mainAction from "./context/main/mainAction";
 import {getJson} from "./util";
 
 function useInitPage(initUrl, {state, dispatch}) {
-    const [res, setRes] = useState(null);
+    const [res, setRes] = useState([]);
     const [url, setUrl] = useState(initUrl);
 
     const addValue = url => setUrl(url);
@@ -14,7 +14,7 @@ function useInitPage(initUrl, {state, dispatch}) {
         const getData = async () => {
             try {
                 dispatch(mainAction.pageLoading(true));
-                const res = await getJson(url, {value: state.value});
+                const res = await getJson(url);
                 if (!ignore) {
                     setRes(res);
                 }
@@ -47,8 +47,8 @@ function App() {
     return (
         <div>
             <div>
-                <button onClick={() => addValue(initUrl + '?bagName=224-truck2_2019-05-09-14-28-19_41-0')}>user</button>
-                {res && res.map(item =>
+                <button onClick={() => addValue(initUrl + '?bagName=224-truck2_2019-05-09-14-28-19_41-0')}>search</button>
+                {res.map(item =>
                     <p key={item.id}>{item.bagName}</p>
                 )}
             </div>
